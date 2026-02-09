@@ -1,0 +1,218 @@
+//
+//  SettingsView.swift
+//  macappyessir
+//
+//  Created by Jay Vora on 2/5/26.
+//
+
+import SwiftUI
+
+struct SettingsView: View {
+    @State private var companyName: String = "Your Company Name"
+    @State private var businessType: String = "General Contractor"
+    @State private var notificationsEnabled: Bool = true
+    @State private var autoBackup: Bool = true
+    @State private var showKeyboardShortcuts: Bool = false
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                Text("Settings")
+                    .font(.system(size: 32, weight: .bold))
+                    .padding(.horizontal, 24)
+                    .padding(.top, 24)
+
+                // Business Info
+                SettingsSection(title: "Business Information") {
+                    VStack(spacing: 16) {
+                        SettingsField(title: "Company Name", text: $companyName)
+                        SettingsField(title: "Business Type", text: $businessType)
+                    }
+                }
+
+                // App Preferences
+                SettingsSection(title: "Preferences") {
+                    VStack(spacing: 12) {
+                        SettingsToggle(
+                            title: "Notifications",
+                            subtitle: "Receive job updates and reminders",
+                            isOn: $notificationsEnabled
+                        )
+
+                        Divider()
+
+                        SettingsToggle(
+                            title: "Auto Backup",
+                            subtitle: "Automatically backup job data",
+                            isOn: $autoBackup
+                        )
+                    }
+                }
+
+                // AI Settings
+                SettingsSection(title: "AI Features") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "sparkles")
+                                .font(.title3)
+                                .foregroundColor(.orange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("AI Camera Estimates")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text("Coming soon - automatic estimates from photos")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+
+                // Data Storage
+                SettingsSection(title: "Data Storage") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Data Location")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text(DataManager.shared.getDataDirectoryPath())
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            Button("Show in Finder") {
+                                NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: DataManager.shared.getDataDirectoryPath())
+                            }
+                            .buttonStyle(.bordered)
+                        }
+
+                        Divider()
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Photos Directory")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text(DataManager.shared.getPhotosDirectoryPath())
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            Button("Show in Finder") {
+                                NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: DataManager.shared.getPhotosDirectoryPath())
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                }
+
+                // About
+                SettingsSection(title: "About") {
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Version")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("1.0.0")
+                                .fontWeight(.medium)
+                        }
+
+                        Divider()
+
+                        Button("Keyboard Shortcuts") {
+                            showKeyboardShortcuts = true
+                        }
+                        .buttonStyle(.link)
+
+                        Divider()
+
+                        Button("Privacy Policy") {}
+                            .buttonStyle(.link)
+
+                        Divider()
+
+                        Button("Terms of Service") {}
+                            .buttonStyle(.link)
+                    }
+                }
+
+                Spacer(minLength: 40)
+            }
+        }
+        .background(Color(nsColor: .windowBackgroundColor))
+        .sheet(isPresented: $showKeyboardShortcuts) {
+            KeyboardShortcutsView()
+        }
+    }
+}
+
+struct SettingsSection<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.headline)
+                .padding(.horizontal, 24)
+
+            VStack {
+                content
+            }
+            .padding(20)
+            .background(Color(nsColor: .controlBackgroundColor))
+            .cornerRadius(12)
+            .padding(.horizontal, 24)
+        }
+    }
+}
+
+struct SettingsField: View {
+    let title: String
+    @Binding var text: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.medium)
+            TextField("", text: $text)
+                .textFieldStyle(.plain)
+                .padding(10)
+                .background(Color(nsColor: .textBackgroundColor))
+                .cornerRadius(6)
+        }
+    }
+}
+
+struct SettingsToggle: View {
+    let title: String
+    let subtitle: String
+    @Binding var isOn: Bool
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+        }
+    }
+}
+
+#Preview {
+    SettingsView()
+}
