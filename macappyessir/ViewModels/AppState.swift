@@ -7,6 +7,22 @@
 
 import SwiftUI
 
+enum AppTheme: String, CaseIterable, Identifiable {
+    case system = "System"
+    case light = "Light"
+    case dark = "Dark"
+
+    var id: String { rawValue }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+}
+
 @Observable
 class AppState {
     var selectedItem: NavigationItem? = .dashboard
@@ -16,8 +32,21 @@ class AppState {
         }
     }
     var toastManager = ToastManager()
+    var theme: AppTheme {
+        didSet {
+            UserDefaults.standard.set(theme.rawValue, forKey: "appTheme")
+        }
+    }
 
     init() {
+        // Load theme preference
+        if let savedTheme = UserDefaults.standard.string(forKey: "appTheme"),
+           let theme = AppTheme(rawValue: savedTheme) {
+            self.theme = theme
+        } else {
+            self.theme = .light
+        }
+
         loadJobs()
     }
 

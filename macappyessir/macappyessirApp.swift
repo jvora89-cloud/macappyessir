@@ -16,7 +16,7 @@ struct macappyessirApp: App {
             ContentView()
                 .environment(appState)
                 .focusedSceneValue(\.appState, $appState)
-                .preferredColorScheme(.light)
+                .preferredColorScheme(appState.theme.colorScheme)
         }
         .commands {
             AppCommands()

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(AppState.self) private var appState
     @State private var companyName: String = "Your Company Name"
     @State private var businessType: String = "General Contractor"
     @State private var notificationsEnabled: Bool = true
@@ -28,6 +29,34 @@ struct SettingsView: View {
                     VStack(spacing: 16) {
                         SettingsField(title: "Company Name", text: $companyName)
                         SettingsField(title: "Business Type", text: $businessType)
+                    }
+                }
+
+                // Appearance
+                SettingsSection(title: "Appearance") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Theme")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+
+                        Picker("", selection: Binding(
+                            get: { appState.theme },
+                            set: { appState.theme = $0 }
+                        )) {
+                            ForEach(AppTheme.allCases) { theme in
+                                HStack {
+                                    Image(systemName: themeIcon(for: theme))
+                                    Text(theme.rawValue)
+                                }
+                                .tag(theme)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+
+                        Text("Choose how QuoteHub looks. System will match your macOS appearance.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 4)
                     }
                 }
 
@@ -148,6 +177,14 @@ struct SettingsView: View {
             KeyboardShortcutsView()
         }
     }
+
+    private func themeIcon(for theme: AppTheme) -> String {
+        switch theme {
+        case .system: return "circle.lefthalf.filled"
+        case .light: return "sun.max.fill"
+        case .dark: return "moon.fill"
+        }
+    }
 }
 
 struct SettingsSection<Content: View>: View {
@@ -215,4 +252,5 @@ struct SettingsToggle: View {
 
 #Preview {
     SettingsView()
+        .environment(AppState())
 }
