@@ -18,6 +18,7 @@ struct NewEstimateView: View {
     @State private var showCamera: Bool = false
     @State private var showEstimateCost: Bool = false
     @State private var showValidation: Bool = false
+    @State private var showTemplatePicker: Bool = false
 
     let columns = [
         GridItem(.adaptive(minimum: 120), spacing: 12)
@@ -31,12 +32,24 @@ struct NewEstimateView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 // Header
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("New Estimate")
-                        .font(.system(size: 32, weight: .bold))
-                    Text("Use AI camera or enter details manually")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("New Estimate")
+                            .font(.system(size: 32, weight: .bold))
+                        Text("Use AI camera or enter details manually")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Button(action: { showTemplatePicker = true }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "doc.text.fill.badge.plus")
+                            Text("Use Template")
+                        }
+                    }
+                    .buttonStyle(.bordered)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
@@ -203,6 +216,20 @@ struct NewEstimateView: View {
                 jobDescription: jobDescription
             )
         }
+        .sheet(isPresented: $showTemplatePicker) {
+            TemplatePickerView { template in
+                applyTemplate(template)
+            }
+        }
+    }
+
+    private func applyTemplate(_ template: JobTemplate) {
+        selectedType = template.contractorType
+        jobDescription = template.description
+        appState.toastManager.show(
+            message: "Template applied: \(template.name)",
+            icon: "doc.text.fill"
+        )
     }
 
     private func clearForm() {
