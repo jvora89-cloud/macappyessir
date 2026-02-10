@@ -190,6 +190,12 @@ struct JobCard: View {
         .onTapGesture {
             showingJobDetail = true
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(job.clientName), \(job.contractorType.rawValue)")
+        .accessibilityValue(accessibilityDescription)
+        .accessibilityHint("Double tap to view job details")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier(AccessibilityID.jobCard)
         .sheet(isPresented: $showingPaymentHistory) {
             PaymentHistoryView(job: job)
         }
@@ -212,6 +218,21 @@ struct JobCard: View {
         case .electrical: return .yellow
         case .hvac: return .teal
         }
+    }
+
+    private var accessibilityDescription: String {
+        var description = "\(job.formattedEstimate) estimate"
+        if job.isCompleted {
+            description += ", Completed"
+        } else {
+            description += ", \(Int(job.progress * 100))% complete"
+        }
+        if job.isFullyPaid {
+            description += ", Paid in full"
+        } else if !job.payments.isEmpty {
+            description += ", \(job.formattedTotalPaid) paid"
+        }
+        return description
     }
 
     private var dateText: String {

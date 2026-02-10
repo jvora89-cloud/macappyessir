@@ -28,6 +28,9 @@ struct RightSidebar: View {
                 }
                 .buttonStyle(.plain)
                 .help(item.title)
+                .accessibilityLabel(item.title)
+                .accessibilityHint("Navigate to \(item.title)")
+                .accessibilityAddTraits(appState.selectedItem == item ? [.isButton, .isSelected] : .isButton)
             }
 
             Spacer()
