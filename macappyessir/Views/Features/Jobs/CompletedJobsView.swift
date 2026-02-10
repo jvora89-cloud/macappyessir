@@ -60,12 +60,28 @@ struct CompletedJobsView: View {
             // Jobs List
             ScrollableContentView {
                 if filteredJobs.isEmpty {
-                    EmptyStateView(
-                        icon: searchText.isEmpty ? "checkmark.seal.fill" : "magnifyingglass",
-                        title: searchText.isEmpty ? "No completed jobs yet" : "No matching jobs",
-                        message: searchText.isEmpty ? "Completed jobs will appear here" : "Try adjusting your search"
-                    )
-                    .padding(.top, 60)
+                    if searchText.isEmpty {
+                        // No completed jobs
+                        EnhancedEmptyState(
+                            icon: "checkmark.seal.fill",
+                            title: "No Completed Jobs Yet",
+                            message: "Finish your first job to start building your success story",
+                            tips: [
+                                "Mark jobs complete from the job detail page",
+                                "Completed jobs show in your revenue statistics",
+                                "Generate invoices to track final payments"
+                            ]
+                        )
+                        .padding(.top, 60)
+                    } else {
+                        // Search returned no results
+                        EmptyStateView(
+                            icon: "magnifyingglass",
+                            title: "No Matching Jobs",
+                            message: "Try adjusting your search terms"
+                        )
+                        .padding(.top, 60)
+                    }
                 } else {
                     VStack(spacing: 16) {
                         ForEach(filteredJobs) { job in

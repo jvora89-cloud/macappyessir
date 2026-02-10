@@ -144,10 +144,19 @@ struct DashboardView: View {
                     .padding(.horizontal, 24)
 
                     if appState.activeJobs.isEmpty {
-                        EmptyStateView(
+                        EnhancedEmptyState(
                             icon: "hammer.fill",
-                            title: "No active jobs",
-                            message: "Create a new estimate to get started"
+                            title: "No Active Jobs",
+                            message: "Start managing your contracting business with your first estimate",
+                            actionTitle: "Create First Estimate",
+                            action: {
+                                appState.selectedItem = .newEstimate
+                            },
+                            tips: [
+                                "Press ⌘N anytime to create a new estimate",
+                                "AI will suggest costs based on your project description",
+                                "Track progress, payments, and photos all in one place"
+                            ]
                         )
                         .padding(.horizontal, 24)
                     } else {

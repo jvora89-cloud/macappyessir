@@ -53,12 +53,32 @@ struct ActiveJobsView: View {
             // Jobs List
             ScrollableContentView {
                 if filteredJobs.isEmpty {
-                    EmptyStateView(
-                        icon: searchText.isEmpty ? "hammer.fill" : "magnifyingglass",
-                        title: searchText.isEmpty ? "No active jobs" : "No matching jobs",
-                        message: searchText.isEmpty ? "Create a new estimate to get started" : "Try adjusting your search"
-                    )
-                    .padding(.top, 60)
+                    if searchText.isEmpty {
+                        // No jobs at all
+                        EnhancedEmptyState(
+                            icon: "hammer.fill",
+                            title: "No Active Jobs Yet",
+                            message: "Start your first project and watch your business grow",
+                            actionTitle: "Create Estimate",
+                            action: {
+                                appState.selectedItem = .newEstimate
+                            },
+                            tips: [
+                                "Use ⌘N to quickly create estimates",
+                                "Add photos to document your work",
+                                "Track payments and remaining balances"
+                            ]
+                        )
+                        .padding(.top, 60)
+                    } else {
+                        // Search returned no results
+                        EmptyStateView(
+                            icon: "magnifyingglass",
+                            title: "No Matching Jobs",
+                            message: "Try adjusting your search terms"
+                        )
+                        .padding(.top, 60)
+                    }
                 } else {
                     VStack(spacing: 16) {
                         ForEach(filteredJobs) { job in
