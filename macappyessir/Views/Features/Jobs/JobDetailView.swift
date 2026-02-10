@@ -203,6 +203,18 @@ struct JobDetailView: View {
 
                 Divider()
 
+                Button(action: { emailEstimate() }) {
+                    Label("Email Estimate", systemImage: "envelope")
+                }
+                .disabled(job.clientEmail.isEmpty)
+
+                Button(action: { emailInvoice() }) {
+                    Label("Email Invoice", systemImage: "envelope.fill")
+                }
+                .disabled(job.clientEmail.isEmpty)
+
+                Divider()
+
                 Button(action: { printJob() }) {
                     Label("Print", systemImage: "printer")
                 }
@@ -248,6 +260,30 @@ struct JobDetailView: View {
             appState.toastManager.show(message: "Invoice exported!", icon: "doc.text.fill")
         } else {
             appState.toastManager.show(message: "Export failed", icon: "exclamationmark.triangle")
+        }
+    }
+
+    private func emailEstimate() {
+        if let pdfURL = PDFGenerator.shared.generateEstimatePDF(for: job) {
+            if EmailService.shared.sendEstimate(for: job, pdfURL: pdfURL) {
+                appState.toastManager.show(message: "Email composed!", icon: "envelope")
+            } else {
+                appState.toastManager.show(message: "Email failed - check client email", icon: "exclamationmark.triangle")
+            }
+        } else {
+            appState.toastManager.show(message: "PDF generation failed", icon: "exclamationmark.triangle")
+        }
+    }
+
+    private func emailInvoice() {
+        if let pdfURL = PDFGenerator.shared.generateInvoicePDF(for: job) {
+            if EmailService.shared.sendInvoice(for: job, pdfURL: pdfURL) {
+                appState.toastManager.show(message: "Email composed!", icon: "envelope.fill")
+            } else {
+                appState.toastManager.show(message: "Email failed - check client email", icon: "exclamationmark.triangle")
+            }
+        } else {
+            appState.toastManager.show(message: "PDF generation failed", icon: "exclamationmark.triangle")
         }
     }
 

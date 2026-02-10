@@ -14,6 +14,7 @@ struct SettingsView: View {
     @State private var notificationsEnabled: Bool = true
     @State private var autoBackup: Bool = true
     @State private var showKeyboardShortcuts: Bool = false
+    @State private var showExportView: Bool = false
 
     var body: some View {
         ScrollView {
@@ -98,6 +99,27 @@ struct SettingsView: View {
                     }
                 }
 
+                // Data Export
+                SettingsSection(title: "Data Export") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Export to CSV")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text("Export jobs, payments, and financial reports")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Button("Export Data") {
+                                showExportView = true
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+                }
+
                 // Data Storage
                 SettingsSection(title: "Data Storage") {
                     VStack(alignment: .leading, spacing: 12) {
@@ -175,6 +197,9 @@ struct SettingsView: View {
         .background(Color(nsColor: .windowBackgroundColor))
         .sheet(isPresented: $showKeyboardShortcuts) {
             KeyboardShortcutsView()
+        }
+        .sheet(isPresented: $showExportView) {
+            ExportView()
         }
     }
 
