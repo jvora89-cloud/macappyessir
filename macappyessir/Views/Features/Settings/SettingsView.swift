@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var autoBackup: Bool = true
     @State private var showKeyboardShortcuts: Bool = false
     @State private var showExportView: Bool = false
+    @State private var showDiagnostics: Bool = false
 
     var body: some View {
         ScrollView {
@@ -161,6 +162,27 @@ struct SettingsView: View {
                     }
                 }
 
+                // Diagnostics
+                SettingsSection(title: "Diagnostics") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Performance & Error Monitoring")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text("View app performance metrics and error logs")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Button("View Diagnostics") {
+                                showDiagnostics = true
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+                }
+
                 // About
                 SettingsSection(title: "About") {
                     VStack(spacing: 12) {
@@ -200,6 +222,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showExportView) {
             ExportView()
+        }
+        .sheet(isPresented: $showDiagnostics) {
+            DiagnosticsView()
         }
     }
 

@@ -38,6 +38,8 @@ class AppState {
         }
     }
 
+    private var sessionStartTime: Date?
+
     init() {
         // Load theme preference
         if let savedTheme = UserDefaults.standard.string(forKey: "appTheme"),
@@ -48,6 +50,18 @@ class AppState {
         }
 
         loadJobs()
+
+        // Track session start
+        sessionStartTime = Date()
+        AnalyticsManager.shared.trackSessionStart()
+    }
+
+    deinit {
+        // Track session end
+        if let startTime = sessionStartTime {
+            let duration = Date().timeIntervalSince(startTime)
+            AnalyticsManager.shared.trackSessionEnd(duration: duration)
+        }
     }
 
     private func loadJobs() {
@@ -141,17 +155,37 @@ class AppState {
 
     func addJob(_ job: Job) {
         jobs.append(job)
+
+        // Track job creation
+        AnalyticsManager.shared.trackJobCreated(
+            type: job.contractorType,
+            estimatedCost: job.estimatedCost
+        )
     }
 
     func updateJob(_ job: Job) {
         if let index = jobs.firstIndex(where: { $0.id == job.id }) {
+            let oldJob = jobs[index]
             jobs[index] = job
+
+            // Track job completion
+            if job.isCompleted && !oldJob.isCompleted {
+                let durationDays = job.completionDate.map { Calendar.current.dateComponents([.day], from: job.startDate, to: $0).day ?? 0 } ?? 0
+                AnalyticsManager.shared.trackJobCompleted(
+                    type: job.contractorType,
+                    actualCost: job.actualCost ?? job.estimatedCost,
+                    durationDays: durationDays
+                )
+            }
         }
     }
 
     func deleteJob(_ job: Job) {
         jobs.removeAll { $0.id == job.id }
         DataManager.shared.deleteAllPhotosForJob(jobId: job.id)
+
+        // Track job deletion
+        AnalyticsManager.shared.trackJobDeleted(type: job.contractorType)
     }
 
     var activeJobs: [Job] {
