@@ -3,9 +3,11 @@
 //  macappyessir
 //
 //  Created by Jay Vora on 2/5/26.
+//  Enhanced for multi-device camera support
 //
 
 import SwiftUI
+import AVFoundation
 
 struct WorkingCameraView: View {
     @Binding var isPresented: Bool
@@ -16,29 +18,87 @@ struct WorkingCameraView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            HStack {
-                Button("Cancel") {
-                    cameraManager.stopCamera()
-                    isPresented = false
+            VStack(spacing: 0) {
+                HStack {
+                    Button("Cancel") {
+                        cameraManager.stopCamera()
+                        isPresented = false
+                    }
+                    .buttonStyle(.plain)
+
+                    Spacer()
+
+                    Text("AI Camera")
+                        .font(.headline)
+
+                    Spacer()
+
+                    Button("Done (\(capturedPhotos.count))") {
+                        cameraManager.stopCamera()
+                        onPhotosCaptured?(capturedPhotos)
+                        isPresented = false
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(capturedPhotos.isEmpty)
                 }
-                .buttonStyle(.plain)
+                .padding()
 
-                Spacer()
+                // Camera selector bar
+                if !cameraManager.availableCameras.isEmpty {
+                    HStack(spacing: 12) {
+                        Image(systemName: "camera.fill")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
 
-                Text("AI Camera")
-                    .font(.headline)
+                        Menu {
+                            ForEach(cameraManager.availableCameras, id: \.uniqueID) { camera in
+                                Button(action: {
+                                    cameraManager.switchCamera(to: camera)
+                                }) {
+                                    HStack {
+                                        Text(camera.localizedName)
+                                        Spacer()
+                                        Text(cameraManager.cameraTypeDescription(for: camera))
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
 
-                Spacer()
+                                        if camera.uniqueID == cameraManager.selectedCamera?.uniqueID {
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(cameraManager.getCameraInfo())
+                                    .font(.subheadline)
+                                Image(systemName: "chevron.down")
+                                    .font(.caption2)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .cornerRadius(8)
+                        }
+                        .buttonStyle(.plain)
 
-                Button("Done (\(capturedPhotos.count))") {
-                    cameraManager.stopCamera()
-                    onPhotosCaptured?(capturedPhotos)
-                    isPresented = false
+                        if cameraManager.availableCameras.count > 1 {
+                            Text("•")
+                                .foregroundColor(.secondary)
+                                .font(.caption)
+
+                            Text("\(cameraManager.availableCameras.count) cameras available")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
                 }
-                .buttonStyle(.plain)
-                .disabled(capturedPhotos.isEmpty)
             }
-            .padding()
             .background(Color(nsColor: .controlBackgroundColor))
 
             // Camera Preview
@@ -162,6 +222,29 @@ struct WorkingCameraView: View {
                         .cornerRadius(12)
                         .padding(16)
                         Spacer()
+
+                        // Camera type indicator (top right)
+                        if let selectedCamera = cameraManager.selectedCamera {
+                            VStack(alignment: .trailing, spacing: 4) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: cameraIcon(for: selectedCamera))
+                                        .font(.caption)
+                                    Text(cameraManager.cameraTypeDescription(for: selectedCamera))
+                                        .font(.caption2)
+                                        .fontWeight(.medium)
+                                }
+                                if cameraManager.availableCameras.count > 1 {
+                                    Text("Tap Switch to change")
+                                        .font(.caption2)
+                                        .opacity(0.8)
+                                }
+                            }
+                            .foregroundColor(.white)
+                            .padding(12)
+                            .background(Color.black.opacity(0.5))
+                            .cornerRadius(10)
+                            .padding(16)
+                        }
                     }
                     Spacer()
                 }
@@ -198,16 +281,27 @@ struct WorkingCameraView: View {
                     .buttonStyle(.plain)
                     .foregroundColor(.white)
 
-                    Button(action: {}) {
+                    Button(action: {
+                        // Switch to next available camera
+                        guard let currentCamera = cameraManager.selectedCamera,
+                              let currentIndex = cameraManager.availableCameras.firstIndex(where: { $0.uniqueID == currentCamera.uniqueID }) else {
+                            return
+                        }
+
+                        let nextIndex = (currentIndex + 1) % cameraManager.availableCameras.count
+                        let nextCamera = cameraManager.availableCameras[nextIndex]
+                        cameraManager.switchCamera(to: nextCamera)
+                    }) {
                         VStack(spacing: 4) {
                             Image(systemName: "arrow.triangle.2.circlepath.camera")
                                 .font(.title3)
-                            Text("Flip")
+                            Text("Switch")
                                 .font(.caption)
                         }
                     }
                     .buttonStyle(.plain)
                     .foregroundColor(.white)
+                    .disabled(cameraManager.availableCameras.count <= 1)
                 }
             }
             .padding(.vertical, 30)
@@ -225,6 +319,22 @@ struct WorkingCameraView: View {
         }
         .onDisappear {
             cameraManager.stopCamera()
+        }
+    }
+
+    // Helper function to get appropriate icon for camera type
+    private func cameraIcon(for device: AVCaptureDevice) -> String {
+        switch device.deviceType {
+        case .builtInWideAngleCamera:
+            return "laptopcomputer"
+        case .continuityCamera:
+            return "iphone"
+        case .deskViewCamera:
+            return "iphone.and.arrow.forward"
+        case .external:
+            return "video"
+        default:
+            return "camera"
         }
     }
 }

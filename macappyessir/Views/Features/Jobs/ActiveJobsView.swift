@@ -9,20 +9,13 @@ import SwiftUI
 
 struct ActiveJobsView: View {
     @Environment(AppState.self) private var appState
-    @State private var searchText: String = ""
+    @State private var filters = JobFilters()
     @State private var isSelectionMode: Bool = false
     @State private var selectedJobs: Set<UUID> = []
     @State private var showDeleteConfirmation: Bool = false
 
     var filteredJobs: [Job] {
-        if searchText.isEmpty {
-            return appState.activeJobs
-        }
-        return appState.activeJobs.filter {
-            $0.clientName.localizedCaseInsensitiveContains(searchText) ||
-            $0.address.localizedCaseInsensitiveContains(searchText) ||
-            $0.description.localizedCaseInsensitiveContains(searchText)
-        }
+        appState.activeJobs.applyFilters(filters)
     }
 
     var body: some View {
@@ -56,16 +49,8 @@ struct ActiveJobsView: View {
                     }
                 }
 
-                // Search
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                    TextField("Search jobs...", text: $searchText)
-                        .textFieldStyle(.plain)
-                }
-                .padding(10)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .cornerRadius(8)
+                // Filter Bar
+                JobFilterBar(filters: filters, showProgressFilter: true)
             }
             .padding(24)
             .background(Color(nsColor: .windowBackgroundColor))
@@ -75,7 +60,7 @@ struct ActiveJobsView: View {
             // Jobs List
             ScrollableContentView {
                 if filteredJobs.isEmpty {
-                    if searchText.isEmpty {
+                    if filters.searchText.isEmpty && !filters.hasActiveFilters {
                         // No jobs at all
                         EnhancedEmptyState(
                             icon: "hammer.fill",
@@ -93,29 +78,39 @@ struct ActiveJobsView: View {
                         )
                         .padding(.top, 60)
                     } else {
-                        // Search returned no results
-                        EmptyStateView(
-                            icon: "magnifyingglass",
-                            title: "No Matching Jobs",
-                            message: "Try adjusting your search terms"
-                        )
+                        // Filters returned no results
+                        VStack(spacing: 16) {
+                            EmptyStateView(
+                                icon: "magnifyingglass",
+                                title: "No Matching Jobs",
+                                message: "Try adjusting your filters"
+                            )
+                            Button("Clear All Filters") {
+                                filters.clearAll()
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
                         .padding(.top, 60)
                     }
                 } else {
-                    VStack(spacing: 16) {
-                        ForEach(filteredJobs) { job in
-                            if isSelectionMode {
-                                SelectableJobCard(
-                                    job: job,
-                                    isSelected: selectedJobs.contains(job.id),
-                                    onToggle: { toggleJobSelection(job) }
-                                )
-                            } else {
-                                JobCard(job: job)
+                    if filters.viewMode == .grid {
+                        JobGridView(jobs: filteredJobs)
+                    } else {
+                        VStack(spacing: 16) {
+                            ForEach(filteredJobs) { job in
+                                if isSelectionMode {
+                                    SelectableJobCard(
+                                        job: job,
+                                        isSelected: selectedJobs.contains(job.id),
+                                        onToggle: { toggleJobSelection(job) }
+                                    )
+                                } else {
+                                    JobCard(job: job)
+                                }
                             }
                         }
+                        .padding(24)
                     }
-                    .padding(24)
                 }
             }
 

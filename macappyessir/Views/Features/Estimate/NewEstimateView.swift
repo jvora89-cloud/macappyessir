@@ -9,6 +9,26 @@ import SwiftUI
 
 struct NewEstimateView: View {
     @Environment(AppState.self) private var appState
+    @State private var useWizard: Bool = true
+
+    var body: some View {
+        if useWizard {
+            NewEstimateWizard()
+        } else {
+            legacyView
+        }
+    }
+
+    // Legacy view (kept for reference)
+    private var legacyView: some View {
+        LegacyNewEstimateView()
+    }
+}
+
+// MARK: - Legacy View (Original Implementation)
+
+struct LegacyNewEstimateView: View {
+    @Environment(AppState.self) private var appState
     @State private var clientName: String = ""
     @State private var clientPhone: String = ""
     @State private var clientEmail: String = ""

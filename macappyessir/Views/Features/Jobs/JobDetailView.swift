@@ -25,6 +25,19 @@ struct JobDetailView: View {
         case progress = "Progress"
         case payments = "Payments"
         case photos = "Photos"
+        case notes = "Notes"
+        case activity = "Activity"
+
+        var icon: String {
+            switch self {
+            case .overview: return "doc.text.fill"
+            case .progress: return "chart.bar.fill"
+            case .payments: return "dollarsign.circle.fill"
+            case .photos: return "photo.fill"
+            case .notes: return "note.text"
+            case .activity: return "clock.fill"
+            }
+        }
     }
 
     var body: some View {
@@ -64,6 +77,10 @@ struct JobDetailView: View {
                         PaymentsTab(job: job, showAddPayment: $showAddPayment)
                     case .photos:
                         PhotosTab(job: job)
+                    case .notes:
+                        NotesTab(job: job)
+                    case .activity:
+                        ActivityTab(job: job)
                     }
                 }
                 .padding(24)
@@ -160,13 +177,39 @@ struct JobDetailView: View {
 
             Spacer()
 
-            // Close button
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.secondary)
+            // Navigation arrows
+            HStack(spacing: 8) {
+                Button(action: navigateToPrevious) {
+                    Image(systemName: "chevron.left.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(canNavigatePrevious ? .secondary : .gray.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canNavigatePrevious)
+                .help("Previous Job (⌘←)")
+
+                Button(action: navigateToNext) {
+                    Image(systemName: "chevron.right.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(canNavigateNext ? .secondary : .gray.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canNavigateNext)
+                .help("Next Job (⌘→)")
+
+                Divider()
+                    .frame(height: 20)
+                    .padding(.horizontal, 4)
+
+                // Close button
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Close (⌘W)")
             }
-            .buttonStyle(.plain)
         }
         .padding(24)
     }
@@ -244,6 +287,37 @@ struct JobDetailView: View {
         }
         .padding(24)
     }
+
+    // MARK: - Navigation Helpers
+
+    private var canNavigatePrevious: Bool {
+        guard let currentIndex = allJobs.firstIndex(where: { $0.id == job.id }) else { return false }
+        return currentIndex > 0
+    }
+
+    private var canNavigateNext: Bool {
+        guard let currentIndex = allJobs.firstIndex(where: { $0.id == job.id }) else { return false }
+        return currentIndex < allJobs.count - 1
+    }
+
+    private var allJobs: [Job] {
+        appState.activeJobs + appState.completedJobs
+    }
+
+    private func navigateToPrevious() {
+        guard let currentIndex = allJobs.firstIndex(where: { $0.id == job.id }),
+              currentIndex > 0 else { return }
+        // In a real implementation, this would update the selected job
+        // For now, this is a placeholder
+    }
+
+    private func navigateToNext() {
+        guard let currentIndex = allJobs.firstIndex(where: { $0.id == job.id }),
+              currentIndex < allJobs.count - 1 else { return }
+        // In a real implementation, this would update the selected job
+    }
+
+    // MARK: - PDF Export
 
     private func exportEstimatePDF() {
         if let pdfURL = PDFGenerator.shared.generateEstimatePDF(for: job) {
@@ -947,6 +1021,232 @@ struct EmptyPhotosView: View {
         .padding(40)
         .background(Color(nsColor: .controlBackgroundColor))
         .cornerRadius(12)
+    }
+}
+
+// MARK: - Notes Tab
+
+struct NotesTab: View {
+    let job: Job
+    @State private var notes: String
+    @State private var isEditing = false
+
+    init(job: Job) {
+        self.job = job
+        _notes = State(initialValue: job.notes)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Job Notes")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+
+                Spacer()
+
+                if isEditing {
+                    HStack(spacing: 8) {
+                        Button("Cancel") {
+                            notes = job.notes
+                            isEditing = false
+                        }
+                        .buttonStyle(.bordered)
+
+                        Button("Save") {
+                            saveNotes()
+                            isEditing = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                } else {
+                    Button("Edit") {
+                        isEditing = true
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+
+            if isEditing {
+                TextEditor(text: $notes)
+                    .font(.body)
+                    .frame(minHeight: 300)
+                    .padding(12)
+                    .background(Color(nsColor: .textBackgroundColor))
+                    .cornerRadius(8)
+            } else if notes.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "note.text")
+                        .font(.system(size: 48))
+                        .foregroundColor(.secondary)
+
+                    Text("No Notes Yet")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+
+                    Text("Add notes to keep track of important details, client preferences, or special requirements")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+
+                    Button("Add Notes") {
+                        isEditing = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(60)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .cornerRadius(12)
+            } else {
+                ScrollView {
+                    Text(notes)
+                        .font(.body)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                        .background(Color(nsColor: .controlBackgroundColor))
+                        .cornerRadius(8)
+                }
+            }
+        }
+    }
+
+    private func saveNotes() {
+        // In real app, would save to data manager
+        print("Saving notes: \(notes)")
+    }
+}
+
+// MARK: - Activity Tab
+
+struct ActivityTab: View {
+    let job: Job
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Activity History")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            if activities.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 48))
+                        .foregroundColor(.secondary)
+
+                    Text("No Activity Yet")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+
+                    Text("Activity log will show job updates, status changes, and payment records")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(60)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .cornerRadius(12)
+            } else {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(activities) { activity in
+                            JobActivityRow(activity: activity)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var activities: [ActivityLogItem] {
+        var items: [ActivityLogItem] = []
+
+        // Job created
+        items.append(ActivityLogItem(
+            icon: "plus.circle.fill",
+            color: .blue,
+            title: "Job Created",
+            description: "Initial estimate of \(job.formattedEstimate)",
+            timestamp: job.startDate
+        ))
+
+        // Payments
+        for payment in job.payments {
+            items.append(ActivityLogItem(
+                icon: "dollarsign.circle.fill",
+                color: .green,
+                title: "Payment Received",
+                description: "\(payment.formattedAmount) via \(payment.paymentMethod.rawValue)",
+                timestamp: payment.date
+            ))
+        }
+
+        // Completion
+        if job.isCompleted, let completionDate = job.completionDate {
+            items.append(ActivityLogItem(
+                icon: "checkmark.seal.fill",
+                color: .green,
+                title: "Job Completed",
+                description: "Final cost: \(job.formattedActual ?? job.formattedEstimate)",
+                timestamp: completionDate
+            ))
+        }
+
+        return items.sorted(by: { $0.timestamp > $1.timestamp })
+    }
+}
+
+struct ActivityLogItem: Identifiable {
+    let id = UUID()
+    let icon: String
+    let color: Color
+    let title: String
+    let description: String
+    let timestamp: Date
+}
+
+struct JobActivityRow: View {
+    let activity: ActivityLogItem
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            // Timeline indicator
+            VStack(spacing: 0) {
+                Circle()
+                    .fill(activity.color)
+                    .frame(width: 12, height: 12)
+
+                Rectangle()
+                    .fill(activity.color.opacity(0.3))
+                    .frame(width: 2)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: activity.icon)
+                        .foregroundColor(activity.color)
+
+                    Text(activity.title)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+
+                    Spacer()
+
+                    Text(activity.timestamp, style: .relative)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Text(activity.description)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.vertical, 12)
+        }
+        .padding(.horizontal, 16)
     }
 }
 

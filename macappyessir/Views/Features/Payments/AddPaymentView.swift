@@ -18,6 +18,8 @@ struct AddPaymentView: View {
     @State private var date: Date = Date()
     @State private var notes: String = ""
     @State private var showValidationError = false
+    @State private var showReceipt = false
+    @State private var lastPayment: Payment?
 
     var remainingBalance: Double {
         job.remainingBalance
@@ -193,6 +195,11 @@ struct AddPaymentView: View {
             .padding(24)
         }
         .frame(width: 500, height: 650)
+        .sheet(isPresented: $showReceipt) {
+            if let payment = lastPayment {
+                PaymentReceiptView(payment: payment, job: job)
+            }
+        }
     }
 
     private func addPayment() {
@@ -212,7 +219,14 @@ struct AddPaymentView: View {
         updatedJob.payments.append(payment)
         appState.updateJob(updatedJob)
 
-        dismiss()
+        appState.toastManager.show(
+            message: "Payment added successfully!",
+            icon: "checkmark.circle.fill"
+        )
+
+        // Option to show receipt
+        lastPayment = payment
+        showReceipt = true
     }
 }
 

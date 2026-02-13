@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var showKeyboardShortcuts: Bool = false
     @State private var showExportView: Bool = false
     @State private var showDiagnostics: Bool = false
+    @State private var showCameraDiagnostics: Bool = false
 
     var body: some View {
         ScrollView {
@@ -180,6 +181,24 @@ struct SettingsView: View {
                             }
                             .buttonStyle(.borderedProminent)
                         }
+
+                        Divider()
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Camera Diagnostic")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text("Check camera status and troubleshoot issues")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Button("Camera Test") {
+                                showCameraDiagnostics = true
+                            }
+                            .buttonStyle(.bordered)
+                        }
                     }
                 }
 
@@ -225,6 +244,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showDiagnostics) {
             DiagnosticsView()
+        }
+        .sheet(isPresented: $showCameraDiagnostics) {
+            CameraDiagnosticView()
         }
     }
 

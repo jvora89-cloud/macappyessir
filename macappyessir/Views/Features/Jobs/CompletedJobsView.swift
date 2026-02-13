@@ -9,16 +9,10 @@ import SwiftUI
 
 struct CompletedJobsView: View {
     @Environment(AppState.self) private var appState
-    @State private var searchText: String = ""
+    @State private var filters = JobFilters()
 
     var filteredJobs: [Job] {
-        if searchText.isEmpty {
-            return appState.completedJobs
-        }
-        return appState.completedJobs.filter {
-            $0.clientName.localizedCaseInsensitiveContains(searchText) ||
-            $0.address.localizedCaseInsensitiveContains(searchText)
-        }
+        appState.completedJobs.applyFilters(filters)
     }
 
     var body: some View {
@@ -41,16 +35,8 @@ struct CompletedJobsView: View {
                     }
                 }
 
-                // Search
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                    TextField("Search completed jobs...", text: $searchText)
-                        .textFieldStyle(.plain)
-                }
-                .padding(10)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .cornerRadius(8)
+                // Filter Bar
+                JobFilterBar(filters: filters, showProgressFilter: false)
             }
             .padding(24)
             .background(Color(nsColor: .windowBackgroundColor))
@@ -60,7 +46,7 @@ struct CompletedJobsView: View {
             // Jobs List
             ScrollableContentView {
                 if filteredJobs.isEmpty {
-                    if searchText.isEmpty {
+                    if filters.searchText.isEmpty && !filters.hasActiveFilters {
                         // No completed jobs
                         EnhancedEmptyState(
                             icon: "checkmark.seal.fill",
@@ -74,21 +60,31 @@ struct CompletedJobsView: View {
                         )
                         .padding(.top, 60)
                     } else {
-                        // Search returned no results
-                        EmptyStateView(
-                            icon: "magnifyingglass",
-                            title: "No Matching Jobs",
-                            message: "Try adjusting your search terms"
-                        )
+                        // Filters returned no results
+                        VStack(spacing: 16) {
+                            EmptyStateView(
+                                icon: "magnifyingglass",
+                                title: "No Matching Jobs",
+                                message: "Try adjusting your filters"
+                            )
+                            Button("Clear All Filters") {
+                                filters.clearAll()
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
                         .padding(.top, 60)
                     }
                 } else {
-                    VStack(spacing: 16) {
-                        ForEach(filteredJobs) { job in
-                            JobCard(job: job)
+                    if filters.viewMode == .grid {
+                        JobGridView(jobs: filteredJobs)
+                    } else {
+                        VStack(spacing: 16) {
+                            ForEach(filteredJobs) { job in
+                                JobCard(job: job)
+                            }
                         }
+                        .padding(24)
                     }
-                    .padding(24)
                 }
             }
         }
