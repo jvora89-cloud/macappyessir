@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# MacAppYesSir Landing Page Deployment Script
+# Lakshami Contractors Landing Page Deployment Script
 # This script helps you deploy your landing page to GitHub Pages
 
-echo "🏗️  MacAppYesSir Landing Page Deployment"
+echo "🏗️  Lakshami Contractors Landing Page Deployment"
 echo "========================================"
 echo ""
 
@@ -12,7 +12,7 @@ if [ ! -d .git ]; then
     echo "📦 Initializing git repository..."
     git init
     git add .
-    git commit -m "Initial commit: MacAppYesSir landing page"
+    git commit -m "Initial commit: Lakshami Contractors landing page"
     echo "✅ Git repository initialized"
 else
     echo "✅ Git repository already initialized"

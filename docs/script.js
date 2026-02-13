@@ -61,4 +61,4 @@ document.querySelectorAll('.feature-card, .faq-item').forEach(el => {
 // Mobile menu toggle (if needed in future)
 // Add your mobile menu code here
 
-console.log('MacAppYesSir landing page loaded! 🏗️');
+console.log('Lakshami Contractors landing page loaded! 🏗️');

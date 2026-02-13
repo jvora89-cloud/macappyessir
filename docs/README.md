@@ -1,6 +1,6 @@
-# MacAppYesSir Landing Page 🏗️
+# Lakshami Contractors Landing Page 🏗️
 
-Beautiful, modern landing page for MacAppYesSir - your professional contractor management app.
+Beautiful, modern landing page for Lakshami Contractors - your professional contractor management app.
 
 ## 🚀 Quick Deploy to GitHub Pages
 
@@ -68,7 +68,7 @@ Replace the placeholder in `index.html`:
 </div>
 
 <!-- Replace with: -->
-<img src="screenshot-dashboard.png" alt="MacAppYesSir Dashboard" />
+<img src="screenshot-dashboard.png" alt="Lakshami Contractors Dashboard" />
 ```
 
 Put your screenshots in the `/docs/` folder:
@@ -98,19 +98,19 @@ Update the download button (around line 310):
 
 Replace `#` with:
 - App Store link (when approved): `https://apps.apple.com/app/...`
-- Or direct download: `https://github.com/YOUR_USERNAME/macappyessir/releases/latest/download/MacAppYesSir.dmg`
+- Or direct download: `https://github.com/YOUR_USERNAME/macappyessir/releases/latest/download/Lakshami Contractors.dmg`
 
 ### 4. Update Contact Email
 
-Find all instances of `support@macappyessir.com` and replace with your actual email.
+Find all instances of `support@lakshamicontractors.com` and replace with your actual email.
 
 ### 5. Add Custom Domain (Optional)
 
-If you have a domain (e.g., macappyessir.com):
+If you have a domain (e.g., lakshamicontractors.com):
 
 1. Create a file named `CNAME` in `/docs/`:
 ```bash
-echo "macappyessir.com" > docs/CNAME
+echo "lakshamicontractors.com" > docs/CNAME
 ```
 
 2. Configure DNS with your domain registrar:
@@ -211,7 +211,7 @@ Create a favicon and add to `<head>`:
 
 For better social sharing, add to `<head>`:
 ```html
-<meta property="og:title" content="MacAppYesSir - Professional Contractor Management">
+<meta property="og:title" content="Lakshami Contractors - Professional Contractor Management">
 <meta property="og:description" content="Manage your contracting business like a pro">
 <meta property="og:image" content="https://YOUR_USERNAME.github.io/macappyessir/og-image.png">
 <meta property="og:url" content="https://YOUR_USERNAME.github.io/macappyessir/">
@@ -300,14 +300,14 @@ After your landing page is live:
 
 Need help?
 - Open an issue on GitHub
-- Email: support@macappyessir.com
+- Email: support@lakshamicontractors.com
 - Check GitHub Pages docs: https://docs.github.com/pages
 
 ---
 
 ## 📄 License
 
-© 2026 MacAppYesSir. All rights reserved.
+© 2026 Lakshami Contractors. All rights reserved.
 
 ---
 
