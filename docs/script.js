@@ -62,3 +62,31 @@ document.querySelectorAll('.feature-card, .faq-item').forEach(el => {
 // Add your mobile menu code here
 
 console.log('Lakshami Contractors landing page loaded! 🏗️');
+
+// Analytics event tracking
+function trackEvent(eventName, eventParams) {
+    if (typeof gtag === 'function') {
+        gtag('event', eventName, eventParams);
+    }
+}
+
+// Track download button clicks
+document.querySelectorAll('.btn-download, .btn-hero, .btn-pricing').forEach(button => {
+    button.addEventListener('click', function(e) {
+        const buttonText = this.textContent.trim().substring(0, 50);
+        trackEvent('download_click', {
+            'button_location': buttonText,
+            'button_class': this.className
+        });
+    });
+});
+
+// Track navigation clicks
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', function(e) {
+        trackEvent('navigation_click', {
+            'link_text': this.textContent.trim(),
+            'link_href': this.getAttribute('href')
+        });
+    });
+});
