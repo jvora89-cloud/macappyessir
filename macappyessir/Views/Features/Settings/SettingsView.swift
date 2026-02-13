@@ -202,6 +202,48 @@ struct SettingsView: View {
                     }
                 }
 
+                // Developer Tools (Debug only)
+                #if DEBUG
+                SettingsSection(title: "Developer Tools") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Sample Data")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text("Load realistic sample jobs for testing and screenshots")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Button("Load Sample Data") {
+                                appState.loadSampleData()
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+
+                        Divider()
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Clear All Data")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text("Remove all jobs and data (cannot be undone)")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                            Spacer()
+                            Button("Clear Data") {
+                                appState.clearSampleData()
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(.red)
+                        }
+                    }
+                }
+                #endif
+
                 // About
                 SettingsSection(title: "About") {
                     VStack(spacing: 12) {
